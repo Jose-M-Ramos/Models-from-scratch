@@ -1,0 +1,136 @@
+import numpy as np
+
+#Load dataset
+
+
+#Pre-process the data
+
+
+# Set the learning rate
+learning_rate = 
+
+# Set the number of epochs
+num_epochs = 
+
+# Set the batch size
+batch_size = 
+
+# Set the number of hidden units
+num_units = 
+
+#Set the size of the input layer of the neural network
+input_size = 
+
+#Set the number of classes
+num_classes = 
+
+# Initialize the weights and biases
+w1 = np.random.randn(input_size, num_units)
+b1 = np.zeros(num_units)
+w2 = np.random.randn(num_units, num_classes )
+b2 = np.zeros(num_classes)
+
+# Define the sigmoid activation function
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
+
+# Define the softmax activation function
+def softmax(x):
+    exp = np.exp(x - np.max(x))
+    return exp / np.sum(exp, axis=1, keepdims=True)
+
+# Define the cross-entropy loss function
+def cross_entropy_loss(y_pred, y_true):
+    return -np.sum(y_true * np.log(y_pred), axis=1)
+
+# Define the mean squared error loss function
+def mean_squared_error_loss(y_pred, y_true):
+    return 0.5 * np.sum((y_pred - y_true)**2, axis=1)
+
+# Define the forward pass
+def forward_pass(x, w1, b1, w2, b2):
+    z1 = x.dot(w1) + b1
+    a1 = sigmoid(z1)
+    z2 = a1.dot(w2) + b2
+    a2 = softmax(z2)
+    return z1, a1, z2, a2
+
+# Define the backward pass
+def backward_pass(x, y, z1, a1, z2, a2, w1, b1, w2, b2):
+    m = x.shape[0]
+    dz2 = a2 - y
+    dw2 = a1.T.dot(dz2) / m
+    db2 = np.sum(dz2, axis=0) / m
+    da1 = dz2.dot(w2.T)
+    dz1 = da1 * sigmoid(z1) * (1 - sigmoid(z1))
+    dw1 = x.T.dot(dz1) / m
+    db1 = np.sum(dz1, axis=0) / m
+    return dw1, db1, dw2, db2
+
+# Define the update weights and biases function
+def update_weights_and_biases(w1, b1, w2, b2, dw1, db1, dw2, db2, learning_rate):
+    w1 -= learning_rate * dw1
+    b1 -= learning_rate * db1
+    w2 -= learning_rate * dw2
+    b2 -= learning_rate * db2
+    return w1, b1, w2, b2
+
+# Define the accuracy function
+def accuracy(y_pred, y_true):
+    return np.mean(np.argmax(y_pred, axis=1) == np.argmax(y_true, axis=1))
+
+# Initialize the lists of losses and accuracies
+losses = []
+accuracies = []
+
+# Loop over the number of epochs
+for epoch in range(num_epochs):
+    # Shuffle the training data
+    shuffle_index = np.random.permutation(x_train.shape[0])
+    x_train_shuffled = x_train[shuffle_index]
+    y_train_shuffled = y_train[shuffle_index]
+
+    # Loop over the batches
+    for i in range(0, x_train.shape[0], batch_size):
+        # Get the batch data
+        x_batch = x_train_shuffled[i:i+batch_size]
+        y_batch = y_train_shuffled[i:i+batch_size]
+
+        # Compute the forward pass
+        z1, a1, z2, a2 = forward_pass(x_batch, w1, b1, w2, b2)
+
+        # Compute the backward pass
+        dw1, db1, dw2, db2 = backward_pass(x_batch, y_batch, z1, a1, z2, a2, w1, b1, w2, b2)
+
+        # Update the weights and biases
+        w1, b1, w2, b2 = update_weights_and_biases(w1, b1, w2, b2, dw1, db1, dw2, db2, learning_rate)
+        
+   
+    # Compute the training loss and accuracy
+    z1, a1, z2, a2 = forward_pass(x_train, w1, b1, w2, b2)
+    loss = np.mean(cross_entropy_loss(a2, y_train))
+    accuracy = accuracy(a2, y_train)
+    losses.append(loss)
+    accuracies.append(accuracy)
+
+    # Compute the test loss and accuracy
+    z1, a1, z2, a2 = forward_pass(x_test, w1, b1, w2, b2)
+    test_loss = np.mean(cross_entropy_loss(a2, y_test))
+    test_accuracy = accuracy(a2, y_test)
+    print(f'Epoch {epoch+1}: loss={loss:.4f}, accuracy={accuracy:.4f}, test_loss={test_loss:.4f}, test_accuracy={test_accuracy:.4f}')
+
+
+ #Save the weights and biases 
+    
+np.save('w1.npy', w1)
+np.save('b1.npy', b1)
+np.save('w2.npy', w2)
+np.save('b2.npy', b2)
+
+
+# Plot the losses and accuracies
+import matplotlib.pyplot as plt
+plt.plot(losses, label='loss')
+plt.plot(accuracies, label='accuracy')
+plt.legend()
+plt.show()
