@@ -1,0 +1,27 @@
+'''How to use the model on new data'''
+
+import numpy as np
+
+from _ import sigmoid, softmax, fordward_pass
+
+# Load the weights and biases from the model trained previously
+w1 = np.load('w1.npy')
+b1 = np.load('b1.npy')
+w2 = np.load('w2.npy')
+b2 = np.load('b2.npy')
+
+# Load the data and preprocess it if necessary
+new_data = np.load('newdata.npy')  # Load the data as a NumPy array
+
+
+# Perform a forward pass through the neural network
+_, _, _, output = forward_pass(new_data, w1, b1, w2, b2)
+
+# Get the predicted class
+prediction = np.argmax(output)
+
+print(f'Predicted class: {prediction}')
+
+'''Once the model has been trained, the weights and biases have already been learned and do not need to be updated further. Therefore, the backward pass function is not needed when using the model for inference.
+
+However, if you want to use the model to fine-tune it or continue training it on new data, then you will need to include the backward_pass and update_weights_and_biases function as well. ''' 
