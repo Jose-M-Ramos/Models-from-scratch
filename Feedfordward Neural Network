@@ -65,5 +65,21 @@ def backward_pass(x, y, z1, a1, z2, a2, w1, b1, w2, b2):
     dw2 = a1.T.dot(dz2) / m
     db2 = np.sum(dz2, axis=0) / m
     da1 = dz2.dot(w2.T)
-    dz1 = da1 * sigmoid(z1) * (1 - sigmoid(
+    dz1 = da1 * sigmoid(z1) * (1 - sigmoid(z1))
+    dw1 = x.T.dot(dz1) / m
+    db1 = np.sum(dz1, axis=0) / m
+    return dw1, db1, dw2, db2
+
+# Define the update weights and biases function
+def update_weights_and_biases(w1, b1, w2, b2, dw1, db1, dw2, db2, learning_rate):
+    w1 -= learning_rate * dw1
+    b1 -= learning_rate * db1
+    w2 -= learning_rate * dw2
+    b2 -= learning_rate * db2
+    return w1, b1, w2, b2
+
+# Define the accuracy function
+def accuracy(y_pred, y_true):
+    return np.mean(np.argmax(y_pred, axis=1) == np.argmax(y_true, axis=1))
+
 
