@@ -1,0 +1,141 @@
+'''Import the necessary libraries and set some parameters for the CNN'''
+
+def max_pool(input, pool_size, stride):
+    # Get the dimensions of the input
+    input_height, input_width, input_channels = input.shape
+
+    # Compute the output dimensions of the pooling layer
+    output_height = (input_height - pool_size) // stride + 1
+    output_width = (input_width - pool_size) // stride + 1
+
+    # Initialize the output array
+    output = np.zeros((output_height, output_width, input_channels))
+
+    # Loop over the output channels
+    for c in range(input_channels):
+        # Loop over the output rows
+        for r in range(output_height):
+            # Loop over the output columns
+            for i in range(output_width):
+                # Extract a region of the input that will be used for the pooling
+                region = input[r * stride:r * stride + pool_size, i * stride:i * stride + pool_size, c]
+                # Perform the pooling operation
+                output[r, i, c] = np.max(region)
+
+    return output
+
+'''This function will take an input image, the filters, and the biases as inputs and return the output of the convolutional layer.'''
+
+def convolve(image, filters, biases):
+    # Get the dimensions of the image and the filters
+    image_height, image_width, image_channels = image.shape
+    filter_height, filter_width, filter_channels, num_filters = filters.shape
+
+    # Compute the output dimensions of the convolutional layer
+    output_height = (image_height - filter_height + 2 * padding) // stride + 1
+    output_width = (image_width - filter_width + 2 * padding) // stride + 1
+
+    # Initialize the output array
+    output = np.zeros((output_height, output_width, num_filters))
+
+    # Add padding to the input image
+    image_padded = np.pad(image, ((padding, padding), (padding, padding), (0, 0)), mode='constant')
+
+    # Loop over the output channels
+    for f in range(num_filters):
+        # Loop over the output rows
+        for r in range(output_height):
+            # Loop over the output columns
+            for c in range(output_width):
+                # Extract a region of the input image that will be used for the convolution
+                region = image_padded[r * stride:r * stride + filter_height, c * stride:c * stride + filter_width, :]
+                # Perform the convolution
+                output[r, c, f] = np.sum(region * filters[:,:,:,f]) + biases[f]
+
+    return output
+
+'''This function will take an input array and return the output of the max pooling layer.''
+
+def max_pool(input, pool_size, stride):
+    # Get the dimensions of the input
+    input_height, input_width, input_channels = input.shape
+
+    # Compute the output dimensions of the pooling layer
+    output_height = (input_height - pool_size) // stride + 1
+    output_width = (input_width - pool_size) // stride + 1
+
+    # Initialize the output array
+    output = np.zeros((output_height, output_width, input_channels))
+
+    # Loop over the output channels
+    for c in range(input_channels):
+        # Loop over the output rows
+        for r in range(output_height):
+            # Loop over the output columns
+            for i in range(output_width):
+                # Extract a region of the input that will be used for the pooling
+                region = input[r * stride:r * stride + pool_size, i * stride:i * stride + pool_size, c]
+                # Perform the pooling operation
+                output[r, i, c] = np.max(region)
+
+    return output
+
+''' This function that takes an input image and passes it through the convolutional and pooling layers in sequence'''
+
+def forward(image, filters, biases, pool_size, stride):
+    conv_output = convolve(image, filters, biases)
+    pool_output = max_pool(conv_output, pool_size, stride)
+    return pool_output
+    
+'''Define a loss function and an optimization algorithm. For example, you could use cross-entropy loss and stochastic gradient descent (SGD) to train the CNN '''
+
+def cross_entropy_loss(output, target):
+    return -np.sum(target * np.log(output))
+
+def sgd(inputs, targets, learning_rate):
+    # Compute the forward pass through the network
+    output = forward(inputs, filters, biases, pool_size, stride)
+
+    # Compute the loss
+    loss = cross_entropy_loss(output, targets)
+
+    # Compute the gradients
+    gradients = compute_gradients(output, targets)
+
+    # Update the weights and biases
+    update_weights_and_biases(gradients, learning_rate)
+
+'''We need to provide an input image and the corresponding target labels to train the model. We pass the input image through the forward function to get the output of the CNN, and compare the output to the target labels using the loss function.'''
+
+# Load the input images and labels
+inputs, labels = load_dataset()
+
+# Set the learning rate for SGD
+learning_rate = 0.01
+
+# Loop over the dataset
+for input, label in zip(inputs, labels):
+    # Pass the input through the CNN
+    output = forward(input, filters, biases, pool_size, stride)
+
+    # Compute the loss
+    loss = cross_entropy_loss(output, label)
+
+    # Print the loss
+    print("Loss:", loss)
+
+    # Update the weights and biases using SGD
+    sgd(input, label, learning_rate)
+
+''' We define a function to perform the prediction, which can be called whenever you want to classify a new image'''
+
+def predict(image, filters, biases, pool_size, stride):
+    # Pass the image through the CNN
+    output = forward(image, filters, biases, pool_size, stride)
+
+    # Get the index of the highest probability
+    predicted_class = np.argmax(output)
+
+    return predicted_class
+
+
